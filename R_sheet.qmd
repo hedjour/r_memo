@@ -1,0 +1,387 @@
+---
+title: "R-Sheet"
+subtitle: "Guide de référence pour l'analyse de données"
+author: 
+  - J-E Longueville
+  - Youna Vandaele
+date: today
+format: 
+  pdf:
+    documentclass: article
+    geometry: 
+      - margin=2cm
+      - a4paper
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    keep-tex: false
+    include-in-header: 
+      text: |
+        \usepackage{fvextra}
+        \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+        \usepackage{longtable}
+        \usepackage{booktabs}
+        \usepackage{array}
+        \usepackage{tabularx}
+        \renewcommand{\arraystretch}{1.2}
+bibliography: references.bib
+lang: fr
+nocite: '@*'
+
+editor_options: 
+  chunk_output_type: console
+---
+
+# Note de préambule {-}
+
+> -   Ce document a pour but d'être un aide mémoire ou une source pour si vous avez un code dont vous ne comprenez pas une subtilité.
+> -   pour les exemples je vais utiliser le data.frame `iris` qui est un data.frame de base de R qui sert à beaucoup d'exemples.
+> - L'organisation d'un script R est une signature personnelle, le plus important est de s'y retrouver. Cependant certaine bonne pratique sont importante à connaitre comme les commentaires ou l'indentation dont nous parlerons.
+
+# ⚡ Operateur :
+
+## Opérateur courant
+
+R utilise des caracters comme opérateurs ainsi nous pouvons noter comme principaux :
+- **#** Le plus important et mal aimé de tous le commentaire. Il permet d'ajouter des informations pour le lecteur du script. Et le vous de 6mois plus tard vous apprécieras ou vous maudira parce qu'il n'y a rien de plus difficile et chronophage que de reprendre un script qu'on a pas relu depuis des années et qui est sans commentaire ni indenté.
+-   **\<-** ou *=* ou le très peu utilisé *->*: Assignation qui permet de stocker le résultat d'une fonction dans une variable. Par convention pour des raisons entre autres de lisibilité : <- rend explicite qu'on fait une assignation, = peut être confondu avec une erreur de comparaison ou un argument de fonction. Par conséquent on réserve = à l'attribution d'argument dans une fonction et *<-* pour une assignation. La flèche vers la droite est peu utilisée par habitude avec d'autre langage et parce qu'on a pas l'habitude d'assigner en fin de ligne. (norme de lecture)
+
+-   **\$** ou  **df\[lignes,colonnes\]** ou *lt[[elem]]* : "get", opérateur qui permet d'accéder à un élément nommé d'un objet (data.frame, liste nommée).Ils permettent d'accéder aux éléments d'une liste (usage doublé pour les listes *lt[[elem]]*) ou d'un data.frame, ou même d'un vecteur. Un point d'erreur auquel il faut faire attention c'est que ces appels ne retourne pas tous le même objet voir en fonction de l'appel le résultat n'est pas le même.
+Par exemple :
+  - iris$Species renvoie un vecteur
+  - iris[, "Species"] renvoie aussi un vecteur
+  - iris["Species"] renvoie un data.frame d'une colonne *\textsc{Ne Jamais L'utiliser}*, ⚠️ source de bug traquenard. Exemple du piège : `length(iris["Species"])` renvoie 1 au lieu de 150 ! ou iris["Species"] == "setosa" retourne FALSE au lieu d'un vecteur de booleen. Deux sources d'erreur non bloquante... Bon courage dans des gros codes pour les débunker.
+Conseil pratique : **$** pour accès simple et rapide à une colonne, **[]** pour des sélections plus complexes ou programmables.
+- **TRUE or FALSE** : Mots clé pour simplement vrai faux.
+- **{}** : Définissent un bloc de code au sein du script
+- **~** : sert à exprimer le liens entre deux variable et exprimer une formule mathématique telle y=f(x) s'exprimera en R y~x. Cette écriture correspond aux formula de la documentation.
+Nous y revenons dans l'exemple sur lm ou plot de base.
+
+## Opérateur conditionnel
+Ces opérateurs permettent de faire des filtres et tests sur vos données (souvent utilisé avec les fonctions select, wich, ou \[ \]:
+
+ | Opérateur | Description          | Exemple       |
+ |-----------|----------------------|---------------|
+ | `!`       | Négation (NOT)       | `!TRUE ou !(TRUE)` retourne `FALSE` |
+ | `==`      | Égal à               | `x == 5` retourne TRUE si x vaut 5  |
+ | `!=`      | Différent de         | `x != 5` retourne TRUE si x ne vaut pas 5|
+ | `<`, `>`  | Inférieur/Supérieur  | `x < 10` retourne TRUE si x est inférieur à 10|
+ | `<=`, `>=`| Inférieur ou égal    | `x >= 0` retourne TRUE si x est supérieur ou égal à 0|
+ 
+## Pipes
+**%\>%**(magritr) ou **\|\>** (base) : pipe, sert à transmettre la partie à gauche du character, à la partie de droite, de base en premier argument de la fonction.
+Il existe une petite nuance %>% permet d'utiliser . pour indiquer la position de l'argument.
+Par exemple :
+- `iris |> head()` équivaut à `head(iris)` ;
+- `iris %>% head(n=6, x=.)` équivaut à `head(x=iris, n=6)` ;
+
+
+## Exemples
+```{r}
+#Accede aux coordonnées 1,1 dans le tableau (data.frame df) iris, soit la premiere ligne 
+#et première colonne.
+iris[1,1]
+#Permet d'accéder à la même cellule
+iris[1,"Sepal.Length"] 
+#Récupère le vecteur Sepal.Length du df iris,
+# et en extrait la première valeur
+iris$Sepal.Length[1] 
+iris[which(iris$Sepal.Length<5),"Sepal.Length"]
+unique(iris[which(iris$Sepal.Length<5),"Sepal.Length"])
+# Peut aussi s'écrire pour être plus facilement lisible :
+iris[which(iris$Sepal.Length<5),"Sepal.Length"] |>
+  unique()
+class(iris$Species)
+class(iris[,"Species"])
+class(iris["Species"])
+```
+
+# Fonctions indispensable de base :
+
+## Fonctions générales
+- **?function** : Affiche la page d'aide de la fonction  appelée, *Le nom de fonction doit être précis et juste.* C'est un raccourci pour la fonction : *help()*
+- **??function** : Permet de chercher dans l'ensemble de l'aide et des paquets installé une fonction proche de "fonction"
+-   **c()** : c pour Combine permet de créer un vecteur.
+
+### Exemples
+```{r}
+?c
+??help
+mon_vecteur <- c(1, 2, 3, 4, 5)
+```
+
+## Fonctions d'explorations 
+- **class()** : Indique la class d'un objet, par exemple data.frame, vector.
+- **str()** : permet de connaitre la structure d'un objet
+- **names()** : affiche les noms de colonne d'un dataframe
+- **head()**/**tail()** : Affiche que les n premiers ou les n derniers éléments d'un objet.
+- **unique()** : retourne les valeurs unique d'un vecteur pour supprimer les doublons
+- **summary()** : affiche un résumé d'un dataframe très utile pour en avoir un survol.
+### Exemples
+```{r}
+class(iris)
+str(iris)
+names(iris)
+head(iris[,"Species"])
+head(iris$Species)
+summary(iris)
+```
+
+## Fonctions de selections
+- **which()** : retourne une liste d'index de ligne qui correspondent au critère logique donnée en argument souvent utiliser pour faire une selection *Ex : df[which(df$to == val),]* 
+- **is.na()** : Retourne TRUE or FAlSE en fonction de si la valeur est NA (Not Attribuated) ou pas, si l'on passe un vecteur en argument la fonction retourne un vecteur booléen de même taille.
+- **na.omit()** : fonction qui permet de supprimer (ometre) toutes les lignes qui contiennent un NA, dans n'importe quelle colonne. na.omit ne supprime pas les colonnes.
+- **rm()** : supprimer une variable devenue inutile pour libérer de l'espace mémoire
+
+- **local({sous script})** : usage de variable locales qui ne sont pas stockée en mémoire à l'accolade fermante (ex : calcul intermédiaire sans polluer l'espace global).
+- **paquet::fonction** : Celui-ci est le moins courament utilisé mais il est important de le connaitre il sert à appeler une fonction d'un paquet sans charger l'intégralité du paquet en mémoire.
+- **table() ou xtable(~formula)** : Permet de créer une table de contingence des valeurs d'un dataframe.
+- **View()** : Permet d'afficher le contenu d'un dataframe comme un tableur dans Rstudio
+- **dim()**, **nrow()**, **ncol()** : affiche respectivement les dimensions (lignes, colonnes), le nombre de lignes et le nombre de colonne d'un dataframe.
+### Exemples
+```{r}
+#Ici nous utiliserons airquality un autre dataframe comme iris mais contenant des NA.
+nrow(airquality)
+local({tmp <- airquality[which(!is.na(airquality$Ozone)),"Ozone"]
+length(tmp)})
+local({airqual <- na.omit(airquality)
+dim(airqual)})
+```
+
+
+## Lectures écritures de fichier
+- **read.csv()** ou **read.csv2()**, Fonction pour lire et charger des fichiers csv
+- **write.csv()**
+
+## Exemples :
+
+```{r, eval=FALSE}
+write.table(airquality, file="Exempleairqual.csv", row.names = FALSE,
+          sep = ",", dec=".")
+#write.csv2 uses a comma for the decimal point and a semicolon for the separator, the Excel convention for CSV files in some Western European locales.
+write.csv2(airquality, file="Exempleairqual.csv", row.names = FALSE)
+
+airqual = read.csv(file="Exempleairqual.csv", header=TRUE,
+                   sep = ",", dec=".") # ou sep = ";", dec="," si csv2.
+```
+
+# Gestions des Packages :
+
+R est extensible par la communauté par le développement de paquet un paquet R ou library est un ensemble de fonction et de donnée que l'on peut charger en mémoire par la fonction `library()`, ils sont installables par la fonction `install.packages()`. Vous pouvez mettre à jour l'ensemble des paquets par la fonction `update.packages(ask=FALSE)` l'argument ask permet de dire que vous ne voulez pas qu'on vous demande si vous voulez mettre chaque paquet à jour.
+
+## Exemple :
+
+```{r, eval=FALSE}
+# |echo: true
+install.packages("anyLib", dependencies = TRUE)
+update.packages(ask = FALSE)
+```
+
+
+```{r}
+anyLib::anyLib(c("dplyr","ggplot2","scales","multcomp","multcompView"))
+#Equivalent en partie à :
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(multcomp)
+library(multcompView)
+```
+
+## Liste que paquet courament utilisé :
+
+-   anyLib : permet d'installer et de charger directement un paquet
+-   dplyr, tidyr, lubridate : voir le tidyverse dans son ensemble, ensemble de paquet qui permettent de faciliter la modification de jeu de donnée (datawrangling).
+-   ggplot2 : paquet qui définie une grammaire graphique permet de faire de plus joli graphique que les fonctions graphique de base. L'organisation des couches se fait par l'appel à des fonctions supplémentaire lié par un + selon l'image @fig-ggplot.
+
+::: {#fig-ggplot}
+![](GgplotSchema2.png)
+
+Organisation des couches ggplot
+:::
+
+# Nettoyage des données (Data Wrangling)
+
+Pour gérer des données les modifiers et travailler plus efficacement je vous conseille l'usage de dplyr et notamment des fonctions *select*, *mutate*, *filter*, *summarise*.
+Dplyr et le tidy verse a mis en place une nomenclature d'écriture qui utilise le pipe et se compose ainsi :
+
+> variable_de_Stockage <- Data %>%
+>   premiere fonction de transformation des données %>%
+>   deuxieme fonction
+
+Par exemple dans notre df iris nous ne souhaitons conserver que ce qui concerne les sépals et espèces nous pouvons donc écire le code suivant utilisant dplyr.
+
+```{r, error=TRUE}
+iris_sub <- iris %>%
+  select(starts_with("Sepal"), Species) %>%
+  mutate(Species = as.factor(Species),
+         plant = "IRIS")
+
+#Ici les paquets chargé ont plusieurs fonction select avec le même nom la précision
+# dplyr::select permet de corriger l'erreur.
+iris_sub <- iris %>%
+  dplyr::select(starts_with("Sepal"), "Species") %>% 
+  mutate(Species = as.factor(Species),
+         plant = "IRIS")
+```
+
+# Graphiques :
+## Codes graphiques R base
+- plot(y~x)
+- barplot(y~x)
+- hist(x)
+- barplot(x)
+
+```{r}
+#| label: fig-plotbase
+#| fig-cap: "Présentation de plot fait avec les fonctions basique"
+plot(iris$Sepal.Length~iris$Species)
+barplot(table(iris$Species))
+hist(iris$Petal.Length)
+```
+## Code graphiques GGplot plus joli 
+```{r}
+#| label: fig-qq
+#| fig-cap: "QQ-plot pour tester la normalité de la longueur des sépales"
+
+iris %>%
+  ggplot() +
+  aes(sample = Sepal.Length) +
+  stat_qq() +
+  stat_qq_line(color = "red", size = 1) +
+  labs(title = "QQ-plot : Test de normalité") +
+  theme_minimal()
+```
+```{r}
+#| label: fig-violin
+#| fig-cap: "Distribution de la largeur des sépales par espèce (violin plot)"
+
+iris %>%
+  ggplot() +
+  aes(x = Species, y = Sepal.Width, fill = Species) +
+  geom_violin() +
+  theme_minimal()
+```
+```{r}
+#| label: fig-sepal
+#| fig-cap: "Relation entre longueur et largeur des sépales selon les espèces"
+
+# Graphique principal : Relation entre longueur et largeur des sépales
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+  # Couche géométrique : points colorés par espèce
+  geom_point(aes(color = Species), size = 3, alpha = 0.8) +
+  
+  # Ajout d'une ligne de régression par espèce
+  geom_smooth(aes(color = Species), method = "lm", se = TRUE, alpha = 0.2) +
+  
+  # Personnalisation des couleurs
+  scale_color_manual(values = c("setosa" = "#E69F00", 
+                               "versicolor" = "#56B4E9", 
+                               "virginica" = "#009E73")) +
+  
+  # Personnalisation des axes
+  scale_x_continuous(name = "Longueur des sépales (cm)",
+                    breaks = seq(4, 8, by = 0.5)) +
+  scale_y_continuous(name = "Largeur des sépales (cm)",
+                    breaks = seq(2, 5, by = 0.5)) +
+  
+  # Thème et mise en forme
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, color = "gray60"),
+    axis.title = element_text(size = 12, face = "bold"),
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(20, 20, 20, 20)
+  ) +
+  
+  # Titres
+  labs(
+    title = "Relation entre longueur et largeur des sépales",
+    subtitle = "Dataset Iris : comparaison entre les trois espèces",
+    color = "Espèce",
+    caption = "Source : Dataset Iris (R.A. Fisher, 1936)"
+  )
+```
+
+
+```{r}
+#| label: fig-petale
+#| fig-cap: " Distribution des longueurs de pétales"
+# Graphique complémentaire : Distribution des longueurs de pétales
+ggplot(iris, aes(x = Species, y = Petal.Length, fill = Species)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = 21, outlier.size = 2) +
+  geom_jitter(width = 0.2, alpha = 0.5, size = 1.5) +
+  
+  scale_fill_manual(values = c("setosa" = "#E69F00", 
+                              "versicolor" = "#56B4E9", 
+                              "virginica" = "#009E73")) +
+  
+  labs(
+    title = "Distribution de la longueur des pétales par espèce",
+    x = "Espèce",
+    y = "Longueur des pétales (cm)",
+    fill = "Espèce"
+  ) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 12, face = "bold"),
+    legend.position = "none"
+  )
+```
+
+
+# Tests statistiques
+Ici je n'explique pas les prérequis de chaque test, cette partie est plus un aide mémoire.
+Pour avoir des informations dans les détails je ne peux que vous conseiller l'ouvrage de Denis Poinsot [poinsot2004].
+
+| Test | Code | Hypothèse nulle (H₀) |
+|------|------|----------------------:|
+| Normalité (Shapiro) | `shapiro.test(iris$Sepal.Length)` | Les données suivent une loi normale. |
+| Comparaison 2 moyennes - **paramétrique** (t-test) | `t.test(Sepal.Length ~ Species, data = iris)` | Les moyennes sont égales. |
+| Comparaison 2 médianes - **non-paramétrique** (Mann-Whitney) | `wilcox.test(Sepal.Length ~ Species, data = iris)` | Les médianes sont égales. |
+| Comparaison >2 moyennes - **paramétrique** (ANOVA) | `aov(Sepal.Length ~ Species, data = iris) %>% summary()` | Aucune différence entre les groupes. |
+| Comparaison >2 médianes - **non-paramétrique** (Kruskal-Wallis) | `kruskal.test(Sepal.Length ~ Species, data = iris)` | Aucune différence entre les groupes. |
+| Chi² (indépendance) | `chisq.test(table(iris$Species, iris$Petal.Length > 3))` | Les variables sont indépendantes. |
+
+```{r, eval=FALSE}
+shapiro.test(iris$Sepal.Length) #Test normalité
+qqnorm(iris$Sepal.Length, main = "QQ-plot : Longueur des sépales")
+qqline(iris$Sepal.Length, col = "red", lwd = 2)
+bartlett.test() # Test homoscédasticité
+# Test comparaison moyenne
+wilcox.test() #Test de wilcoxon
+t.test() # t test de comparaison de moyenne
+chisq.test() #test chi2
+
+resaov <- aov(formula = form, data)
+summary(resaov)
+reslm <- lm(formula = form, data)
+summary(reslm)
+plot(reslm)
+
+```
+\newpage
+
+# Glossaire {.unnumbered}
+
+- *Variable* : boite dans laquelle nous stockons une information soit un tableau à colonnes nommée (data.frame), une matrice, un vecteur (suite de valeur), une liste, ou un objet informatique.
+- *Vecteur* :
+- *NA* : Not Attribuated soit l'équivalent d'une case vide
+- *data.frame* : tableau comme un fichier excel,
+- *Fonction (function)* : une suite de code qui prends en entrée un ou plusieurs argument pour agir dessus et retourner un objet.
+- *Boucle* : ensemble de lignes que l'on applique de façon répétitive en changeant un paramètre on en distingue généralement deux types (for et while), qui ne sont pas optimale en R. Pour lequel on préfère le raisonnement vectoriel.
+- *Booleen* : Valeur binaire Vrai ou Fausse pour R TRUE or FALSE.
+- *Indentation* : Disposition particulière du texte d'un programme faisant apparaître des décalages au niveau de la marge. Dixit Robert. Autrement dit la mise en page de vos lignes de script pour en faciliter la lecture.
+
+# Références {.unnumbered}
+
+::: {#refs}
+:::
