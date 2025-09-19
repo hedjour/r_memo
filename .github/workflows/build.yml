@@ -17,9 +17,12 @@ jobs:
       - name: Install R
         uses: r-lib/actions/setup-r@v2
       - name: Install R dependencies
-        run: |
-          Rscript -e 'install.packages(c("rmarkdown", "tidyverse", "anyLib"))' 
-          # Ajoutez rmarkdown à la liste des packages
+      run: |
+        Rscript -e 'install.packages(c("rmarkdown", "tidyverse"))'  
+    # Installez d'abord les packages principaux
+        Rscript -e 'install.packages("anyLib", dependencies = TRUE)'
+      # Installez anyLib avec ses dépendances
+
       - name: Install LaTeX
         run: |
           sudo apt-get update
