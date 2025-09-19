@@ -1,0 +1,88 @@
+---
+title: "R-Sheet"
+subtitle: "Aide concise pour l'analyse de données en R"
+author:
+  - "J-E Longueville"
+  - "Youna Vandaele"
+date: today
+format:
+  pdf:
+    documentclass: article
+    geometry:
+      - margin=2cm
+      - a4paper
+    toc: false
+    colorlinks: true
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    keep-tex: false
+    include-in-header:
+      text: |
+        \usepackage{fvextra}
+        \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+bibliography: references.bib
+lang: fr
+nocite: '@*'
+editor_options:
+  chunk_output_type: console
+---
+# Note de préambule {-}
+> - Ce document est un **aide-mémoire concis** pour coder en R.
+> - Exemples basés sur le jeu de données `iris` (inclus dans R).
+> - Priorité à la **simplicité** et à l’**efficacité**.
+
+---
+# ⚡ Opérateurs clés
+
+| Opérateur       | Description| Exemple|
+|-----------------|------------------------------|-----------------|
+| `#`       | Commentaire (indispensable pour relire son code plus tard). | `# Calcul de la moyenne`|
+| `<-` ou `=`     | Assignation (préférer `<-`). | `x <- 5`    |
+| `==`, `!=`, `<` | Comparaisons : égal à ou différent de      | `iris$Sepal.Length == 5.1`      |
+| `%>%`  | Pipe (transmet le résultat à gauche comme $1^{er}$ argument de la fonction).    | `iris %>% head()`|
+| `$` | Accède à une colonne d’un `data.frame`.   | `iris$Species`|
+| `df[lignes, cols]`| Sélectionne des lignes/colonnes d'un dataframe.  | `iris[1:5, ]` (5 premières lignes) |
+
+> ⚠️ **Piège courant** :
+> - `iris["Species"]` → Retourne un `data.frame` (à éviter).
+> - `iris$Species` ou `iris[,"Species"]` → Retourne un **vecteur** (correct).
+
+---
+# 🔧 Fonctions de base indispensables
+
+| Fonction/Opérateur |    Description    | Exemple  |
+|--------------------|-----------|-----------|
+
+| `?fonction`| Affiche l’aide de la fonction.   | `?mean`   |
+| `??mot_clé`   | Cherche dans toute la documentation.   | `??regression` |
+| `c()`  | Combine : Crée un vecteur.   | `x <- c(1, 2, 3)` |
+| `str()`  | Affiche la structure d’un objet.  | `str(iris)` |
+| `summary()` | Résumé statistique d’un `data.frame`. | `summary(iris)`|
+| `names()` | Noms des colonnes.     | `names(iris)` |
+| `unique()`| Valeurs uniques d’un vecteur.  | `unique(iris$Species)` |
+| `which()` | Indices des lignes répondant à une condition. | `which(iris$Sepal.Length > 5)`|
+| `is.na()` | Détecte les valeurs manquantes (`NA`).  | `is.na(iris$Sepal.Length)`|
+| `na.omit()`| Supprime les lignes avec des `NA`. | `iris_clean <- na.omit(iris)` |
+| `rm()`    | Supprime une variable.| `rm(x)` |
+| `local({...})`| Variables locales (non sauvegardées en mémoire après le bloc). | `local({ x <- 1; print(x) })`|
+| `head()`/`tail()`| Affiche les 6 premières/dernières lignes. | `head(iris)`|
+| `View()`  | Ouvre le `data.frame` dans une fenêtre (comme un tableur).| `View(iris)`  |
+| `dim()`  | Dimensions (lignes, colonnes). | `dim(iris)` → `150 5`  |
+|`read.csv()`| Ouvre un fichier csv et le charge en mémoire|`dat <- read.csv("nom du fichier", sep=";", dec=",")`|
+|`write.csv2()`| écrit un fichier csv |`dat <- read.csv("nom du fichier", sep=";", dec=",")`|
+
+---
+
+# 📦 Gestion des packages avec `anyLib`
+
+`anyLib` simplifie l’installation et le chargement des packages :
+- **Installe et charge** un package s’il n’est pas présent.
+- **Charge uniquement** s’il est déjà installé.
+
+**Exemple** :
+```r
+# Installe et charge dplyr, ggplot2, et scales
+anyLib::anyLib(c("dplyr", "ggplot2", "scales"))
+```
+
+# Référence complémentaire.
