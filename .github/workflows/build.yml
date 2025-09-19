@@ -17,7 +17,9 @@ jobs:
         uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Install LaTeX
-        uses: actions/setup-texlive@v1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-full
 
       - name: Render QMD to PDF
         run: quarto render R_sheet.qmd --to pdf
