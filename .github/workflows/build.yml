@@ -1,8 +1,5 @@
 name: Render QMD to PDF
 # git tag v1.2.6
-
-name: Render QMD to PDF
-
 on:
   push:
     branches: [ main ]
