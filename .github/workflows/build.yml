@@ -21,12 +21,12 @@ jobs:
       - name: Install LaTeX
         run: |
           sudo apt-get update
-          sudo apt-get install -y texlive-full
+          sudo apt-get install -y texlive
 
       - name: Render QMD to PDF
         run: |
-          Rscript -e 'install.packages(c("rmarkdown", "tidyverse", "quarto")) ;  # Installez d'abord les packages principaux
-                      install.packages("anyLib", dependencies = TRUE);
+          Rscript -e 'install.packages(c("rmarkdown", "anyLib", "quarto", "dplyr","ggplot2","scales", "multcomp",
+                      "multcompView"), dependencies = TRUE);
                       quarto::quarto_render("R_sheet.qmd", output_format = "pdf")'
 
       - name: Create Release
