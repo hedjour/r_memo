@@ -21,7 +21,7 @@ jobs:
 
       - name: Install R dependencies
         run: |
-          Rscript -e 'install.packages(c("rmarkdown", "tidyverse"))'  # Installez d'abord les packages principaux
+          Rscript -e 'install.packages(c("rmarkdown", "tidyverse", "quarto"))'  # Installez d'abord les packages principaux
           Rscript -e 'install.packages("anyLib", dependencies = TRUE)'  # Installez anyLib avec ses dépendances
 
       - name: Install LaTeX
