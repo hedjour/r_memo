@@ -26,13 +26,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y texlive
 
-      - name: Render QMD to PDF
+      - name: Render QMD to PDF & Install R dependencies
         run: |
-          Rscript -e 'install.packages(c("systemfonts", "textshaping", "httr2", "curl", "gert", "gh",
-                      "gargle", "juicyjuice", "sf", "spdep", "gdtools", "officer", "ragg",
-                      "latticeExtra", "Rmpfr", "snowflakeauth", "plotly", "rmarkdown", "anyLib",
-                      "quarto", "dplyr","ggplot2","scales", "multcomp", "multcompView"), dependencies = TRUE);
-                      quarto::quarto_render("R_sheet.qmd", output_format = "pdf")'
+            install.packages(c(
+            "curl", "snowflakeauth", "svglite", "sf", "spdep", "ragg", "gargle", "googledrive",
+            "httr", "gdtools", "officer", "systemfonts", "chromote", "usethis", "pkgdown",
+            "rcmdcheck", "rversions", "urlchecker", "juicyjuice", "raster", "rvest", "latticeExtra",
+            "Rmpfr", "devtools", "satellite", "maptiles", "stars", "tmaptools", "units", "plotly",
+            "systemfonts", "textshaping", "httr2", "curl", "gert", "gh", "Rmpfr", "snowflakeauth",
+            "gargle", "juicyjuice", "sf", "spdep", "gdtools", "officer", "ragg", "latticeExtra",
+            "rmarkdown", "anyLib", "quarto", "dplyr","ggplot2","scales", "multcomp", "multcompView"),
+            dependencies = TRUE)
+            quarto::quarto_render("R_sheet.qmd", output_format = "pdf")'
+        shell: Rscript {0}
 
       - name: Create Release
         id: create_release
