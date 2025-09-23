@@ -28,9 +28,9 @@ jobs:
 
       - name: Render QMD to PDF
         run: |
-          Rscript -e 'install.packages(c('systemfonts', 'textshaping', 'httr2', 'curl', 'gert', 'gh',
-                      'gargle', 'juicyjuice', 'sf', 'spdep', 'gdtools', 'officer', 'ragg',
-                      'latticeExtra', 'Rmpfr', 'snowflakeauth', 'plotly', "rmarkdown", "anyLib",
+          Rscript -e 'install.packages(c("systemfonts", "textshaping", "httr2", "curl", "gert", "gh",
+                      "gargle", "juicyjuice", "sf", "spdep", "gdtools", "officer", "ragg",
+                      "latticeExtra", "Rmpfr", "snowflakeauth", "plotly", "rmarkdown", "anyLib",
                       "quarto", "dplyr","ggplot2","scales", "multcomp", "multcompView"), dependencies = TRUE);
                       quarto::quarto_render("R_sheet.qmd", output_format = "pdf")'
 
